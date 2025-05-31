@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top"> <title>Formulário de Contato</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .form-container { max-width: 500px; margin: auto; padding: 20px; border: 1px solid #ccc; border-radius: 8px; }
+    label { display: block; margin-bottom: 5px; font-weight: bold; }
+    input[type="text"], input[type="email"], textarea {
+      width: calc(100% - 20px);
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    input[type="submit"] {
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    input[type="submit"]:hover {
+      background-color: #45a049;
+    }
+    #responseMessage {
+      margin-top: 20px;
+      padding: 10px;
+      border-radius: 4px;
+      display: none; /* Esconde a mensagem inicialmente */
+    }
+    .success { background-color: #d4edda; color: #155724; border-color: #c3e6cb; }
+    .error { background-color: #f8d7da; color: #721c24; border-color: #f5c6cb; }
+  </style>
+</head>
+<body>
+  <div class="form-container">
+    <h2>Formulário de Contato</h2>
+    <form id="myForm">
+      <label for="nome">Nome:</label>
+      <input type="text" id="nome" name="nome" required>
+
+      <label for="email">Email:</label>
+      <input type="email" id="email" name="email" required>
+
+      <label for="mensagem">Mensagem:</label>
+      <textarea id="mensagem" name="mensagem" rows="5" required></textarea>
+
+      <input type="submit" value="Enviar">
+    </form>
+    <div id="responseMessage"></div>
+  </div>
+
+  <script>
+    // Código JavaScript para lidar com o envio do formulário
+    document.getElementById('myForm').addEventListener('submit', function(e) {
+      e.preventDefault(); // Impede o envio padrão do formulário
+
+      var form = e.target;
+      var formData = new FormData(form);
+      var responseMessage = document.getElementById('responseMessage');
+
+      // Desabilitar o botão de envio para evitar múltiplos cliques
+      form.querySelector('input[type="submit"]').disabled = true;
+
+      // Enviar os dados para o Apps Script
+      google.script.run
+        .withSuccessHandler(function(response) {
+          responseMessage.style.display = 'block';
+          responseMessage.className = 'success';
+          responseMessage.textContent = response; // Exibe a mensagem de sucesso do Apps Script
+          form.reset(); // Limpa o formulário
+          form.querySelector('input[type="submit"]').disabled = false; // Reabilita o botão
+        })
+        .withFailureHandler(function(error) {
+          responseMessage.style.display = 'block';
+          responseMessage.className = 'error';
+          responseMessage.textContent = 'Ocorreu um erro: ' + error.message;
+          form.querySelector('input[type="submit"]').disabled = false; // Reabilita o botão
+        })
+        .doPost(Object.fromEntries(formData.entries())); // Chama a função doPost no Apps Script
+    });
+  </script>
+</body>
+</html>
